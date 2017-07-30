@@ -3,6 +3,6 @@ Showcase of [go-floc](https://github.com/workanator/go-floc) library.
 
 ## Installation
 
-- Clone the repository `git git@github.com:workanator/go-floc-showcase.git $GOPATH/src/go-floc-showcase`
-- Go to the clonned repository `cd $GOPATH/src/go-floc-showcase`
-- Run `make` to see possible target
+- Clone the repository `git clone git@github.com:workanator/go-floc-showcase.git $GOPATH/src/go-floc-showcase`.
+- Go to the cloned repository `cd $GOPATH/src/go-floc-showcase`.
+- Run `make` to see possible targets.
