@@ -12,4 +12,4 @@ Showcase of [go-floc](https://github.com/workanator/go-floc) library.
 The list of examples available in the showcase.
 
 - `Words`.
-- `Counter`
+- `Counter`.
