@@ -25,6 +25,9 @@ func main() {
 		Occurence  map[string]int
 	}
 
+	// Print introduction
+	introduction()
+
 	// Split to words and sanitize
 	SplitToWords := func(flow floc.Flow, state floc.State, update floc.Update) {
 		statistics := state.Data().(*Statistics)
@@ -58,6 +61,8 @@ func main() {
 	PrintResult := func(flow floc.Flow, state floc.State, update floc.Update) {
 		statistics := state.Data().(*Statistics)
 
+		fmt.Println("Text statistics")
+		fmt.Println("---------------------------")
 		fmt.Printf("Words Total               : %d\n", len(statistics.Words))
 		fmt.Printf("Unique Words              : %d\n", len(statistics.Occurence))
 		fmt.Printf("Non-Whitespace Characters : %d\n", statistics.Characters)
@@ -79,4 +84,14 @@ func main() {
 		nil,
 		job,
 	)
+}
+
+func introduction() {
+	fmt.Println(`The example Words runs a sequence of jobs:
+    1. Split a text into a list of words.
+    2. Run in parallel:
+    2.1. Count non-whitespace characters in the each word and sum them.
+    2.2. Count unique words in the text.
+    3. Print a result.
+`)
 }
