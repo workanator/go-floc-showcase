@@ -5,7 +5,7 @@ all:
 	@echo "  - 'ex_counter' (Counter)"
 
 ex_words:
-	@go run examples/words/main.go
+	@go run -race examples/words/main.go
 
 ex_counter:
-	@go run examples/counter/main.go
+	@go run -race examples/counter/main.go
