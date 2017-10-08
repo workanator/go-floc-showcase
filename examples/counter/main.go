@@ -7,14 +7,17 @@ import (
 	"os/signal"
 	"time"
 
-	floc "github.com/workanator/go-floc"
-	"github.com/workanator/go-floc/guard"
-	"github.com/workanator/go-floc/run"
+	"gopkg.in/workanator/go-floc.v2"
+	"gopkg.in/workanator/go-floc.v2/guard"
+	"gopkg.in/workanator/go-floc.v2/run"
 )
 
 func main() {
-	const TimeoutValue = 5 * time.Second
-	const MaxRandom = 10000
+	const (
+		TimeoutValue = 5 * time.Second
+		MaxRandom    = 10000
+		KeyCounter   = 1
+	)
 
 	type Counter struct {
 		Value           uint64 // Current value of the counter
@@ -26,26 +29,30 @@ func main() {
 	introduction()
 
 	// Increment counter
-	IncrementValue := func(flow floc.Flow, state floc.State, update floc.Update) {
-		counter := state.Data().(*Counter)
+	IncrementValue := func(ctx floc.Context, ctrl floc.Control) error {
+		counter := ctx.Value(KeyCounter).(*Counter)
 		counter.Value++
+
+		return nil
 	}
 
 	// Test if Value equals to NextRandomValue
-	NextRandomValueMet := func(state floc.State) bool {
-		counter := state.Data().(*Counter)
+	NextRandomValueMet := func(ctx floc.Context) bool {
+		counter := ctx.Value(KeyCounter).(*Counter)
 		return counter.Value >= counter.NextRandomValue
 	}
 
 	// Increment RandomsMet and generate NextRandomValue
-	IncrementRandomsMet := func(flow floc.Flow, state floc.State, update floc.Update) {
-		counter := state.Data().(*Counter)
+	IncrementRandomsMet := func(ctx floc.Context, ctrl floc.Control) error {
+		counter := ctx.Value(KeyCounter).(*Counter)
 		counter.RandomsMet++
 		counter.NextRandomValue = counter.Value + uint64(rand.Int63n(MaxRandom))
+
+		return nil
 	}
 
 	// Wait for SIGINT OS signal and cancel the flow
-	WaithInterrupt := func(flow floc.Flow, state floc.State, update floc.Update) {
+	WaitInterrupt := func(ctx floc.Context, ctrl floc.Control) error {
 		c := make(chan os.Signal, 1)
 		defer close(c)
 
@@ -55,36 +62,45 @@ func main() {
 		select {
 		case s := <-c:
 			// OS signal was caught
-			flow.Cancel(s)
+			ctrl.Cancel(s)
 
-		case <-flow.Done():
+		case <-ctx.Done():
 			// The flow is finished
 		}
+
+		return nil
 	}
 
-	// Design the job and run it
-	job := guard.TimeoutWithTrigger(
+	// Design the flow and run it
+	flow := guard.OnTimeout(
 		guard.ConstTimeout(TimeoutValue),
 		nil, // No need for timeout ID
 		run.Parallel(
-			WaithInterrupt,
+			WaitInterrupt,
 			run.Loop(
-				IncrementValue,
-				run.If(NextRandomValueMet, IncrementRandomsMet),
+				run.Sequence(
+					IncrementValue,
+					run.If(NextRandomValueMet, IncrementRandomsMet),
+				),
 			),
 		),
-		func(flow floc.Flow, state floc.State, id interface{}) {
+		func(ctx floc.Context, ctrl floc.Control, id interface{}) {
 			// Complete the flow on timeout
-			flow.Complete(nil)
+			ctrl.Complete(ctx.Value(KeyCounter))
 		},
 	)
 
-	flow := floc.NewFlow()
-	state := floc.NewState(new(Counter))
-	floc.Run(flow, state, nil, job)
+	ctx := floc.NewContext()
+	ctx.AddValue(KeyCounter, new(Counter))
+
+	ctrl := floc.NewControl(ctx)
+
+	result, data, err := floc.RunWith(ctx, ctrl, flow)
+	if err != nil {
+		panic(err)
+	}
 
 	// Examine and print results
-	result, data := flow.Result()
 	switch {
 	case result.IsCanceled():
 		fmt.Printf("The flow was canceled by user with reason '%v'.\n", data)
@@ -92,7 +108,7 @@ func main() {
 	case result.IsCompleted():
 		fmt.Println("The flow was completed successfully.")
 
-		counter := state.Data().(*Counter)
+		counter := data.(*Counter)
 		fmt.Println("-------------------")
 		fmt.Printf("Counter Value     : %d\n", counter.Value)
 		fmt.Printf("Randoms Met       : %d\n", counter.RandomsMet)
@@ -111,8 +127,7 @@ func introduction() {
     1.1.2. Run in infinite loop.
     1.1.2.1. Increment the counter value.
     1.1.2.2. If the counter value equals or greater the next random value then 1.1.2.2.T.
-    1.1.2.2.T. Increment the number of randoms met and generate the next random value.
-`)
+    1.1.2.2.T. Increment the number of randoms met and generate the next random value.`)
 
 	fmt.Print("Please wait for 5 seconds until the flow is finished or interrupt it with Ctrl+C.\n\n")
 }
