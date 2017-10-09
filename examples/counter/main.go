@@ -7,9 +7,9 @@ import (
 	"os/signal"
 	"time"
 
-	floc "github.com/workanator/go-floc"
-	"github.com/workanator/go-floc/guard"
-	"github.com/workanator/go-floc/run"
+	"gopkg.in/workanator/go-floc.v1"
+	"gopkg.in/workanator/go-floc.v1/guard"
+	"gopkg.in/workanator/go-floc.v1/run"
 )
 
 func main() {

@@ -1,10 +1,10 @@
 # go-floc-showcase
-Showcase of [go-floc](https://github.com/workanator/go-floc) library.
+Showcase of [go-floc.v1](https://github.com/workanator/go-floc/tree/v1) library.
 
 ## Installation
 
-- Clone the repository `git clone git@github.com:workanator/go-floc-showcase.git $GOPATH/src/go-floc-showcase`.
-- Go to the cloned repository `cd $GOPATH/src/go-floc-showcase`.
+- Clone the repository `git clone -b v1 git@github.com:workanator/go-floc-showcase.git`.
+- Go to the cloned repository `cd go-floc-showcase`.
 - Run `make` to see possible targets.
 
 ## Examples

@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	floc "github.com/workanator/go-floc"
-	"github.com/workanator/go-floc/run"
+	"gopkg.in/workanator/go-floc.v1"
+	"gopkg.in/workanator/go-floc.v1/run"
 )
 
 const exampleText = `Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed
